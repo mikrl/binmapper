@@ -5,8 +5,9 @@ Port to C++
 
 Author: mikrl
 """
-import os, system
-from subprocess import call
+from subprocess import call, check_output
+import re
+import json
 
 class codeSection(object):
     """A section of assembly code, demarcated from the others in a program
@@ -45,10 +46,12 @@ class codeSection(object):
         #code to output class as data structure goes here
         pass
 
-call(["objdump", "-d",  "-j.text", "loopandcall"])
-"""
-with open file as bla:
-       readline in bla
-       if line 
-  """    
+dump = check_output(["objdump", "-d",  "-j.text", "../binaries/loopandcall"]) #grabs raw output from objdump with required options
+asm_lines = dump.decode('utf-8').strip().split('\n') #decodes to utf8 string and splits based on newlines
+command_fields = [asm_line.split('\t') for asm_line in asm_lines] #splits each line into fields of line no, bytes, command etc
+
+function_starts = [lno for  lno, line in enumerate(asm_lines) if re.match('[0-9a-f]+ ', line)]
+function_title = re.search('<.*>:', 
+if re.match
+#{name=
    
