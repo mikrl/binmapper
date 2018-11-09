@@ -41,6 +41,9 @@ class codeSection(object):
 
     def setLength(self, length):
         self.length = length
+
+    def __repr__(self):
+        return "<codeSection {0}\tstart:{1}\tend:{1}+{2}>\n".format(self.name, self.offset, self.offset+self.length)
         
     def export():
         #code to output class as data structure goes here
@@ -50,8 +53,17 @@ dump = check_output(["objdump", "-d",  "-j.text", "../binaries/loopandcall"]) #g
 asm_lines = dump.decode('utf-8').strip().split('\n') #decodes to utf8 string and splits based on newlines
 command_fields = [asm_line.split('\t') for asm_line in asm_lines] #splits each line into fields of line no, bytes, command etc
 
-function_starts = [lno for  lno, line in enumerate(asm_lines) if re.match('[0-9a-f]+ ', line)]
-function_title = re.search('<.*>:', 
-if re.match
+function_starts =[asm_lines[lno] for  lno, line in enumerate(asm_lines) if re.match('[0-9a-f]+ ', line)]
+#function_bodies = [
+
+pattern = re.compile('<.*>')
+
+func_class = [codeSection(name = pattern.findall(line)) for line in function_starts]
+
+test = [pattern.findall(line) for line in asm_lines]
+#json_rep = {"funcname":pass, "funcbody": {
+    
+#function_titles = [title for function in asm_lines 
+#if re.match
 #{name=
    
