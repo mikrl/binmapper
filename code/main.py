@@ -7,7 +7,7 @@ Author: mikrl
 """
 
 ### Imports ###
-from classes.codeSection import codeSection
+from classes.codeSection import function_block
 from subprocess import call, check_output
 import re
 import json
@@ -31,8 +31,8 @@ function_names = list(function_names)
 
 function_bounds = [(start, stop) for start, stop in zip(function_starts, function_starts[1:]+[None])]
 
-pattern = re.compile('<.*>')
-pattern2 = re.compile('[0-9a-f]* ')
+re_func_name= re.compile('<.*>')
+re_func_offset = re.compile('[0-9a-f]* ')
 
 print("[*]Creating function_block objects")
 
@@ -40,19 +40,23 @@ assert(len(function_names) == len(function_bounds))
 for idx, line in enumerate(function_names):
     #print(line)
     
-    name = pattern.findall(line)[0]
-    hex_offset = pattern2.findall(line)[0][:-1]
+    name = re_func_name.findall(line)[0]
+    hex_offset = re_func_offset.findall(line)[0][:-1]
     func_start, func_stop = function_bounds[idx]
     body = [line.replace(" ","").split('\t') for line in asm_lines[func_start+1:func_stop]]
 
     line_nos = [line[0][:-1] for line in body]
-    bytes = [line[1] for line in body]
-    commands = [line[2] if len(line)==3 else None for line in body] 
+    bytecode = [line[1] for line in body]
+    commands = [line[2] if len(line)==3 else None for line in body]
+
+    function_body = [{"line":line[0], "bytes":line[1], "command":line[2]} for line in zip(line_nos, bytecode, commands)]
+    print(function_body)
+    
     #print([el for el in zip(line_nos, bytes, commands)])
     #print(len(line_nos), len(bytes), len(commands))
-    assert (len(line_nos) == len(bytes) == len(commands))
+    assert (len(line_nos) == len(bytecode) == len(commands))
     
-    print(codeSection(name = name, offset = hex_offset, length=line_nos[-1]))
+    print(function_block(name = name, offset = hex_offset, end=line_nos[-1], body=function_body))
 """
 func_class = [codeSection(name = pattern.findall(line), offset=line_no) for line, line_no in function_starts]
 
