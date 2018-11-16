@@ -1,3 +1,21 @@
+##############################################################################
+#binmapper: a program to parse disassemblies into a format useful for making into a control flow graph
+#Copyright (C) 2018 Michael Lynch (mikrlynch@gmail.com)
+#
+#This program is free software: you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation, either version 3 of the License or
+#(at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program. If not, see <https://www.gnu.org/licenses/>.
+##############################################################################
+
 """
 Purpose:
 Scan through asm binaries and generate data structure to be visualised using flowchart libs
@@ -35,8 +53,11 @@ re_func_name= re.compile('<.*>')
 re_func_offset = re.compile('[0-9a-f]* ')
 
 print("[*]Creating function_block objects")
+function_list = []
 
-assert(len(function_names) == len(function_bounds))           
+assert(len(function_names) == len(function_bounds))
+
+
 for idx, line in enumerate(function_names):
     #print(line)
     
@@ -50,13 +71,16 @@ for idx, line in enumerate(function_names):
     commands = [line[2] if len(line)==3 else None for line in body]
 
     function_body = [{"line":line[0], "bytes":line[1], "command":line[2]} for line in zip(line_nos, bytecode, commands)]
-    print(function_body)
-    
+
+    #print(function_body)
     #print([el for el in zip(line_nos, bytes, commands)])
     #print(len(line_nos), len(bytes), len(commands))
     assert (len(line_nos) == len(bytecode) == len(commands))
     
-    print(function_block(name = name, offset = hex_offset, end=line_nos[-1], body=function_body))
+    this_block = function_block(name = name, offset = hex_offset, end=line_nos[-1], body=function_body)
+    function_list.append(this_block)
+
+print("[*]Determining relationship between function blocks")
 """
 func_class = [codeSection(name = pattern.findall(line), offset=line_no) for line, line_no in function_starts]
 
