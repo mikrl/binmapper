@@ -25,7 +25,7 @@ Author: mikrl
 """
 
 ### Imports ###
-from classes.codeSection import function_block
+from classes.codeSection import subroutine
 from subprocess import call, check_output
 import re
 import json
@@ -40,7 +40,7 @@ print("[*]Grabbing asm of .text")
 asm_lines = [line for line in dump.decode('utf-8').strip().split('\n') if len(line)>0] #decodes to utf8 and splits based on newlines
 #print("\n".join(asm_lines))
 
-print("[*]Getting function start locations")
+print("[*]Getting subroutine start locations")
 
 function_defs =[(lno, asm_lines[lno]) for  lno, line in enumerate(asm_lines) if re.match('[0-9a-f]+ ', line)]
 function_starts, function_names = [func_info for func_info in zip(*function_defs)]
@@ -52,14 +52,13 @@ function_bounds = [(start, stop) for start, stop in zip(function_starts, functio
 re_func_name= re.compile('<.*>')
 re_func_offset = re.compile('[0-9a-f]* ')
 
-print("[*]Creating function_block objects")
+print("[*]Creating subroutine objects")
 function_list = []
 
 assert(len(function_names) == len(function_bounds))
 
 
 for idx, line in enumerate(function_names):
-    #print(line)
     
     name = re_func_name.findall(line)[0]
     hex_offset = re_func_offset.findall(line)[0][:-1]
@@ -72,15 +71,34 @@ for idx, line in enumerate(function_names):
 
     function_body = [{"line":line[0], "bytes":line[1], "command":line[2]} for line in zip(line_nos, bytecode, commands)]
 
-    #print(function_body)
-    #print([el for el in zip(line_nos, bytes, commands)])
-    #print(len(line_nos), len(bytes), len(commands))
     assert (len(line_nos) == len(bytecode) == len(commands))
     
-    this_block = function_block(name = name, offset = hex_offset, end=line_nos[-1], body=function_body)
+    this_block = subroutine(name = name, offset = hex_offset, end=line_nos[-1], body=function_body)
     function_list.append(this_block)
 
-print("[*]Determining relationship between function blocks")
+#breakpoint()
+print("[*]Determining relationship between subroutines")
+#for el in function_list: print(el.__repr__(), el.children,'\n')
+for idx, sub in enumerate(function_list):
+    neighbours = function_list[0:idx]+function_list[idx+1:]
+    neighbour_names = [neighbour.name for neighbour in neighbours]
+    #breakpoint()
+    if len(sub.children)!=0:
+
+        #breakpoint()
+        neighbours = function_list[0:idx]+function_list[idx+1:]
+        neighbour_names = [neighbour.name for neighbour in neighbours]
+
+        for child in sub.children:
+            if child in neighbour_names:
+                idx=neighbour_names.index(child)
+
+                #for some reason this appends to ALL in function_list / neighbours
+                breakpoint()
+                neighbours[idx].addParent(sub.getName())
+
+
+for el in function_list: print(el.__repr__(), el.children, el.parents, '\n')
 """
 func_class = [codeSection(name = pattern.findall(line), offset=line_no) for line, line_no in function_starts]
 
