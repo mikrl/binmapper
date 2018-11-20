@@ -38,7 +38,6 @@ print("[*]Getting objdump output of {0}".format(FILENAME))
 dump = check_output(["objdump", "-d",  "-j.text", FILENAME]) #grabs raw output from objdump with required options
 print("[*]Grabbing asm of .text")
 asm_lines = [line for line in dump.decode('utf-8').strip().split('\n') if len(line)>0] #decodes to utf8 and splits based on newlines
-#print("\n".join(asm_lines))
 
 print("[*]Getting subroutine start locations")
 
@@ -76,29 +75,27 @@ for idx, line in enumerate(function_names):
     this_block = subroutine(name = name, offset = hex_offset, end=line_nos[-1], body=function_body)
     function_list.append(this_block)
 
-#breakpoint()
+
 print("[*]Determining relationship between subroutines")
-#for el in function_list: print(el.__repr__(), el.children,'\n')
+
 for idx, sub in enumerate(function_list):
     neighbours = function_list[0:idx]+function_list[idx+1:]
     neighbour_names = [neighbour.name for neighbour in neighbours]
-    #breakpoint()
+    
     if len(sub.children)!=0:
 
-        #breakpoint()
         neighbours = function_list[0:idx]+function_list[idx+1:]
         neighbour_names = [neighbour.name for neighbour in neighbours]
 
         for child in sub.children:
             if child in neighbour_names:
+                
                 idx=neighbour_names.index(child)
-
-                #for some reason this appends to ALL in function_list / neighbours
-                breakpoint()
                 neighbours[idx].addParent(sub.getName())
 
 
-for el in function_list: print(el.__repr__(), el.children, el.parents, '\n')
+#for el in function_list: print(el.__repr__(), '\t',  el.children, '\t', el.parents, '\n', el.export(), '\n\n')
+for el in function_list: print(el.export())
 """
 func_class = [codeSection(name = pattern.findall(line), offset=line_no) for line, line_no in function_starts]
 

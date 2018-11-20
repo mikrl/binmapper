@@ -60,19 +60,16 @@ class subroutine(object):
     def findChildren(self):
         import re
 
-        #print(self.name)
         call_sub = re.compile('(call)')
         sub_name = re.compile('<.*>')
 
-        #breakpoint()
         callees = [line for line in self.body if line['command'] is not None and call_sub.match(line['command'])]
         
-        #breakpoint()
         callee_names = [sub_name.findall(callee['command']) for callee in callees] #*returns a 2D list
         
         
         return [idx for sub in callee_names for idx in sub]#this flattens the 2D list to a 1D list
-        pass
+        
     
     def setLength(self, length):
         self.length = length
@@ -84,12 +81,13 @@ class subroutine(object):
         entry = "{1:0{0}x}\t{2}:".format(self.width, self.offset, self.name)
         body = '\n'.join(["\t{0}:\t{1}\t{2}\n".format(line['line'], line['bytes'], line['command']) for line in self.body])
         return entry + body
+ 
+    def export(self):
 
+        jsonable_dict = {'name':self.name,
+                         'parents':self.parents,
+                         'children':self.children,
+                         'offset':self.offset,
+                         'length':self.length}
         
-        #return string that looks like objdump output
-
-        pass
-    
-    def export():
-        #code to output class as data structure goes here
-        pass
+        return jsonable_dict
