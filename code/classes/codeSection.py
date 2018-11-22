@@ -16,6 +16,22 @@
 #along with this program. If not, see <https://www.gnu.org/licenses/>.
 ##############################################################################
 
+class executable(object):
+    """Representing the executable. Add higher level functions such as rebuilding ELF table or other analysis
+    
+    """
+    
+    def __init__(self, body):
+        self.body = body
+        self.subroutines = []
+        pass
+
+    def parseSubroutines(self):
+        pass
+
+    def export():
+        return [subroutine.export() for subroutine in self.subroutines] 
+
 class subroutine(object):
     """A section of assembly code, demarcated from the others in a program
     with a parent section that this code was called from or, in the case of main, nothing.
