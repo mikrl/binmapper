@@ -19,6 +19,7 @@
 """
 Purpose:
 Scan through asm binaries and generate data structure to be visualised using flowchart libs
+Rebuild stripped binaries
 Port to C++
 
 Author: mikrl
@@ -29,6 +30,8 @@ from classes.codeSection import subroutine
 from subprocess import call, check_output
 import re
 import json
+import networkx as nx
+
 
 ### Constants ###
 FILENAME = "../binaries/loopandcall"
@@ -78,32 +81,39 @@ for idx, line in enumerate(function_names):
 
 print("[*]Determining relationship between subroutines")
 
-for idx, sub in enumerate(function_list):
-    neighbours = function_list[0:idx]+function_list[idx+1:]
-    neighbour_names = [neighbour.name for neighbour in neighbours]
+
+
+
+
+for idx, _subroutine in enumerate(function_list):
+    #neighbours = function_list[0:idx]+function_list[idx+1:]
+    #neighbour_names = [neighbour.name for neighbour in neighbours]
     
-    if len(sub.children)!=0:
+    if len(_subroutine.getChildrenNames() )!=0:
 
         neighbours = function_list[0:idx]+function_list[idx+1:]
         neighbour_names = [neighbour.name for neighbour in neighbours]
 
-        for child in sub.children:
-            if child in neighbour_names:
-                
-                idx=neighbour_names.index(child)
-                neighbours[idx].addParent(sub.getName())
+        for child_sub in _subroutine.getChildrenNames():
+            if child_sub in neighbour_names:
+                child_idx=neighbour_names.index(child_sub)
+                neighbours[child_idx].addParent(_subroutine)
+                _subroutine.addChild(neighbours[child_idx])
 
 
-#for el in function_list: print(el.__repr__(), '\t',  el.children, '\t', el.parents, '\n', el.export(), '\n\n')
-for el in function_list: print(el.export())
-"""
-func_class = [codeSection(name = pattern.findall(line), offset=line_no) for line, line_no in function_starts]
+#for el in function_list: print(el.export())
 
-test = [pattern.findall(line) for line in asm_lines]
-"""
-#json_rep = {"funcname":pass, "funcbody": {
-    
-#function_titles = [title for function in asm_lines 
-#if re.match
-#{name=
-   
+graph_dict = {name: idx for name, idx in enumerate([_subroutine.export()['name'] for _subroutine in function_list])}
+G=nx.DiGraph()
+G.add_nodes_from(function_list)
+for node in G.nodes:
+    children=node.getChildren()
+    G.add_edges_from([(node, child) for child in children])
+
+#G.add_edge(1,2)
+#G.add_edge(2,3)
+
+################################################################################
+#for idx, name in enumerate([_subroutine.export['name'] for _subroutine in function_list]):
+ #   graph_dict.
+

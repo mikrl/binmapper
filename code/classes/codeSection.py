@@ -50,9 +50,10 @@ class subroutine(object):
         self.offset = int(offset, 16)
         self.length = self.calculateLength(offset, end)
         self.body = body
-        self.children = self.findChildren()
+        self.children = []
         self.parents = []
-
+        self.child_names = self.findChildrenNames()
+        
     def calculateLength(self, offset, end):
       return   int(end, 16) - int(offset, 16)
         
@@ -68,12 +69,23 @@ class subroutine(object):
     def addParent(self, new_parent):
         self.parents.append(new_parent)
         
-
-    
     def getParents(self):
         return self.parents
 
-    def findChildren(self):
+    def addChild(self, child):
+        self.children.append(child)
+
+    def addChildren(self, children):
+        self.children.extend(children)
+    
+    def getChildren(self):
+        return self.children
+
+
+    def getChildrenNames(self):
+        return self.child_names
+        
+    def findChildrenNames(self):
         import re
 
         call_sub = re.compile('(call)')
@@ -97,7 +109,14 @@ class subroutine(object):
         entry = "{1:0{0}x}\t{2}:".format(self.width, self.offset, self.name)
         body = '\n'.join(["\t{0}:\t{1}\t{2}\n".format(line['line'], line['bytes'], line['command']) for line in self.body])
         return entry + body
- 
+
+
+    def __hash__(self):
+        return hash(repr(self))
+
+    def __eq__(self, other):
+        return (hash(self)== hash(other))
+        
     def export(self):
 
         jsonable_dict = {'name':self.name,
