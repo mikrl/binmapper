@@ -1,0 +1,3 @@
+# Static
+black==23.1.0
+pylint==2.16.4

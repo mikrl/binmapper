@@ -1,26 +1,25 @@
 ##############################################################################
-#binmapper: a program to parse disassemblies into a format useful for making into a control flow graph
-#Copyright (C) 2018 Michael Lynch (mikrlynch@gmail.com)
+# binmapper: a program to parse disassemblies into a format useful for making into a control flow graph
+# Copyright (C) 2018 Michael Lynch (mikrlynch@gmail.com)
 #
-#This program is free software: you can redistribute it and/or modify
-#it under the terms of the GNU General Public License as published by
-#the Free Software Foundation, either version 3 of the License or
-#(at your option) any later version.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License or
+# (at your option) any later version.
 #
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-#You should have received a copy of the GNU General Public License
-#along with this program. If not, see <https://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 ##############################################################################
 
+
 class executable(object):
-    """Representing the executable. Add higher level functions such as rebuilding ELF table or other analysis
-    
-    """
-    
+    """Representing the executable. Add higher level functions such as rebuilding ELF table or other analysis"""
+
     def __init__(self, body):
         self.body = body
         self.subroutines = []
@@ -30,7 +29,8 @@ class executable(object):
         pass
 
     def export():
-        return [subroutine.export() for subroutine in self.subroutines] 
+        return [subroutine.export() for subroutine in self.subroutines]
+
 
 class subroutine(object):
     """A section of assembly code, demarcated from the others in a program
@@ -44,6 +44,7 @@ class subroutine(object):
 
     Perhaps add a hashing method for fingerprinting to avoid duplicate code sections: if hash in hashes then increment counter.
     """
+
     def __init__(self, name, offset, end, body):
         self.name = name
         self.width = len(offset)
@@ -53,14 +54,14 @@ class subroutine(object):
         self.children = []
         self.parents = []
         self.child_names = self.findChildrenNames()
-        
+
     def calculateLength(self, offset, end):
-      return   int(end, 16) - int(offset, 16)
-        
+        return int(end, 16) - int(offset, 16)
+
     def getName(self):
         return self.name
 
-    def getOffset(self): 
+    def getOffset(self):
         return self.offset
 
     def getLength(self):
@@ -68,7 +69,7 @@ class subroutine(object):
 
     def addParent(self, new_parent):
         self.parents.append(new_parent)
-        
+
     def getParents(self):
         return self.parents
 
@@ -77,52 +78,68 @@ class subroutine(object):
 
     def addChildren(self, children):
         self.children.extend(children)
-    
+
     def getChildren(self):
         return self.children
 
-
     def getChildrenNames(self):
         return self.child_names
-        
+
     def findChildrenNames(self):
         import re
 
-        call_sub = re.compile('(call)')
-        sub_name = re.compile('<.*>')
+        call_sub = re.compile("(call)")
+        sub_name = re.compile("<.*>")
 
-        callees = [line for line in self.body if line['command'] is not None and call_sub.match(line['command'])]
-        
-        callee_names = [sub_name.findall(callee['command']) for callee in callees] #*returns a 2D list
-        
-        
-        return [idx for sub in callee_names for idx in sub]#this flattens the 2D list to a 1D list
-        
-    
+        callees = [
+            line
+            for line in self.body
+            if line["command"] is not None and call_sub.match(line["command"])
+        ]
+
+        callee_names = [
+            sub_name.findall(callee["command"]) for callee in callees
+        ]  # *returns a 2D list
+
+        return [
+            idx for sub in callee_names for idx in sub
+        ]  # this flattens the 2D list to a 1D list
+
     def setLength(self, length):
         self.length = length
 
-    def __repr__(self): #useful representation of function object
-        return "<<< subroutine {0}\tstart:{1:0{3}x}\tend:{1:0{3}x}+{2:0{3}x}>>>\n".format(self.name, self.offset, self.length, self.width)
+    def __repr__(self):  # useful representation of function object
+        return (
+            "<<< subroutine {0}\tstart:{1:0{3}x}\tend:{1:0{3}x}+{2:0{3}x}>>>\n".format(
+                self.name, self.offset, self.length, self.width
+            )
+        )
 
     def __str__(self):
         entry = "{1:0{0}x}\t{2}:".format(self.width, self.offset, self.name)
-        body = '\n'.join(["\t{0}:\t{1}\t{2}\n".format(line['line'], line['bytes'], line['command']) for line in self.body])
+        body = "\n".join(
+            [
+                "\t{0}:\t{1}\t{2}\n".format(
+                    line["line"], line["bytes"], line["command"]
+                )
+                for line in self.body
+            ]
+        )
         return entry + body
-
 
     def __hash__(self):
         return hash(repr(self))
 
     def __eq__(self, other):
-        return (hash(self)== hash(other))
-        
-    def export(self):
+        return hash(self) == hash(other)
 
-        jsonable_dict = {'name':self.name,
-                         'parents':self.parents,
-                         'children':self.children,
-                         'offset':self.offset,
-                         'length':self.length}
-        
+    def export(self):
+        jsonable_dict = {
+            "name": self.name,
+            "parents": self.parents,
+            "children": self.children,
+            "offset": self.offset,
+            "length": self.length,
+        }
+
         return jsonable_dict
