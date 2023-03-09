@@ -1,32 +1,17 @@
-##############################################################################
-# binmapper: a program to parse disassemblies into a format useful for making into a control flow graph
-# Copyright (C) 2018 Michael Lynch (mikrlynch@gmail.com)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <https://www.gnu.org/licenses/>.
-##############################################################################
-
 """
 Purpose:
 Scan through asm binaries and generate data structure to be visualised using flowchart libs
-Rebuild stripped binaries
-Port to C++
+
+#TODO Tag stripped binaries
+#TODO Rewrite parts in C++
+#TODO Refactor code and add usage and license information within the program
+#TODO Consolidate main method into a new executable class.
 
 Author: mikrl
 """
 
 ### Imports ###
-from classes.codeSection import subroutine
+from binmapper.code_graph.code_section import subroutine
 from subprocess import call, check_output
 import re
 import json
